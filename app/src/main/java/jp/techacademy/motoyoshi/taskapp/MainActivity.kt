@@ -89,7 +89,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         //ここに検索ボタンの処理を入れる
-        binding.button1.setOnClickListener{
+        binding.button1.setOnClickListener {
+            // EditTextからテキストを取得
+            val searchText = binding.category.text.toString()
+
+            // Realmデータベースで検索　空白なら全リスト
+            val searchResults = if (searchText.isNotEmpty()) {
+                realm.query<Task>("category contains $0", searchText).sort("date", Sort.DESCENDING).find()
+            } else {
+                // テキストが空の場合、全タスクを取得
+                realm.query<Task>().sort("date", Sort.DESCENDING).find()
+            }
+
+            // 検索結果に基づいてリストビューを更新
+            CoroutineScope(Dispatchers.Default).launch {
+                reloadListView(searchResults)
+            }
         }
 
         // TaskAdapterを生成し、ListViewに設定する
@@ -146,23 +161,12 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        var kensaku: String? = binding.category.text.toString()
-
         // Realmデータベースとの接続を開く
         val config = RealmConfiguration.create(schema = setOf(Task::class))
         realm = Realm.open(config)
 
         //タスクの変数化 初期値は全部
-        var tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
-
-        // Realmからタスクの一覧を取得 ここに条件を設定
-        if (kensaku != null){
-            var tasks = realm.query<Task>("category contains $0",kensaku).sort("date", Sort.DESCENDING).find()
-        }else{
-            var tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
-        }
-//        // Realmからタスクの一覧を取得
-//        val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
+        val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
 
         // Realmが起動、または更新（追加、変更、削除）時にreloadListViewを実行する
         CoroutineScope(Dispatchers.Default).launch {
