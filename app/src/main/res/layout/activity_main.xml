@@ -22,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="8"
-            android:hint="カテゴリ"
+            android:hint="カテゴリー"
             android:padding="8dp"/>
 
         <Button

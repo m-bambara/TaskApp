@@ -23,7 +23,7 @@ import io.realm.kotlin.query.Sort
 import jp.techacademy.motoyoshi.taskapp.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 
-const val EXTRA_TASK = "jp.techacademy.taro.kirameki.taskapp.TASK"
+const val EXTRA_TASK = "jp.techacademy.moytoyoshi.taskapp.TASK"
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -147,12 +147,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         var kensaku: String? = binding.category.text.toString()
+
         // Realmデータベースとの接続を開く
         val config = RealmConfiguration.create(schema = setOf(Task::class))
         realm = Realm.open(config)
 
+        //タスクの変数化 初期値は全部
+        var tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
+
         // Realmからタスクの一覧を取得 ここに条件を設定
-        val tasks = realm.query<Task>("category contains $0",kensaku).sort("date", Sort.DESCENDING).find()
+        if (kensaku != null){
+            var tasks = realm.query<Task>("category contains $0",kensaku).sort("date", Sort.DESCENDING).find()
+        }else{
+            var tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
+        }
 //        // Realmからタスクの一覧を取得
 //        val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
 

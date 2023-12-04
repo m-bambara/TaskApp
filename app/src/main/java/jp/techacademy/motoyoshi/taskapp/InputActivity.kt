@@ -130,6 +130,7 @@ class InputActivity : AppCompatActivity() {
             // taskの値を画面項目に反映
             binding.content.titleEditText.setText(task.title)
             binding.content.contentEditText.setText(task.contents)
+            binding.content.categoryEditText.setText(task.category) //カテゴリー
         }
 
         // 日付と時刻のボタンの表示を設定
@@ -137,7 +138,7 @@ class InputActivity : AppCompatActivity() {
     }
 
     /**
-     * タスクの登録または更新を行う
+     * タスクの登録または更新を行う カテゴリーの追加
      */
     private suspend fun addTask() {
         // 日付型オブジェクトを文字列に変換用
@@ -146,7 +147,9 @@ class InputActivity : AppCompatActivity() {
         // 登録（更新）する値を取得
         val title = binding.content.titleEditText.text.toString()
         val content = binding.content.contentEditText.text.toString()
+        val category = binding.content.categoryEditText.text.toString()
         val date = simpleDateFormat.format(calendar.time)
+
 
         if (task.id == -1) {
             // 登録
@@ -157,6 +160,7 @@ class InputActivity : AppCompatActivity() {
             task.title = title
             task.contents = content
             task.date = date
+            task.category = category
 
             // 登録処理
             realm.writeBlocking {
@@ -170,6 +174,7 @@ class InputActivity : AppCompatActivity() {
                     this.title = title
                     this.contents = content
                     this.date = date
+                    this.category = category
                 }
             }
         }
