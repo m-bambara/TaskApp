@@ -1,5 +1,6 @@
 package jp.techacademy.motoyoshi.taskapp
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
@@ -46,16 +47,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+
         // OSバージョン確認APIレベル33以上
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // 通知権限が許可されているか確認する
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
                 // 権限許可済
                 Log.d("ANDROID","許可されている")
             }else {
                 // 許可されていないので許可ダイアログを表示する
                 Log.d("ANDROID","許可されていない")
-                requestPermissonLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                requestPermissonLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
             // APIレベル33以前のため、アプリ毎の通知設定を確認する
@@ -83,6 +86,10 @@ class MainActivity : AppCompatActivity() {
         binding.fab.setOnClickListener {
             val intent = Intent(this, InputActivity::class.java)
             startActivity(intent)
+        }
+
+        //ここに検索ボタンの処理を入れる
+        binding.button1.setOnClickListener{
         }
 
         // TaskAdapterを生成し、ListViewに設定する
@@ -139,12 +146,15 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+        var kensaku: String? = binding.category.text.toString()
         // Realmデータベースとの接続を開く
         val config = RealmConfiguration.create(schema = setOf(Task::class))
         realm = Realm.open(config)
 
-        // Realmからタスクの一覧を取得
-        val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
+        // Realmからタスクの一覧を取得 ここに条件を設定
+        val tasks = realm.query<Task>("category contains $0",kensaku).sort("date", Sort.DESCENDING).find()
+//        // Realmからタスクの一覧を取得
+//        val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
 
         // Realmが起動、または更新（追加、変更、削除）時にreloadListViewを実行する
         CoroutineScope(Dispatchers.Default).launch {

@@ -19,10 +19,21 @@
         tools:ignore="VisualLintTextFieldSize" />
 
     <EditText
+        android:id="@+id/category_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@id/title_edit_text"
+        android:hint="カテゴリー"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        tools:ignore="VisualLintTextFieldSize" />
+
+    <EditText
         android:id="@+id/content_edit_text"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_below="@id/title_edit_text"
+        android:layout_marginTop="47dp"
         android:hint="@string/input_content_hint"
         android:importantForAutofill="no"
         android:inputType="text"
@@ -30,11 +41,13 @@
 
     <Button
         android:id="@+id/date_button"
-        android:layout_width="0dp"
+        android:layout_width="259dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/content_edit_text"
         android:layout_alignParentStart="true"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="39dp"
         android:layout_toStartOf="@+id/time_button"
         android:text="@string/button_date_text"
         tools:ignore="VisualLintButtonSize" />
@@ -45,6 +58,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/content_edit_text"
         android:layout_alignParentEnd="true"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="3dp"
         android:text="@string/button_time_text" />
 
     <Button
@@ -53,6 +68,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/time_button"
         android:layout_alignParentEnd="true"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="18dp"
         android:text="@string/button_done_text" />
 
 </RelativeLayout>
