@@ -1,6 +1,7 @@
 package jp.techacademy.motoyoshi.taskapp
 
 import android.Manifest
+import android.R
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
@@ -10,6 +11,9 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +25,12 @@ import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedResults
 import io.realm.kotlin.query.Sort
 import jp.techacademy.motoyoshi.taskapp.databinding.ActivityMainBinding
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+
 
 const val EXTRA_TASK = "jp.techacademy.moytoyoshi.taskapp.TASK"
 
@@ -88,24 +97,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        //ここに検索ボタンの処理を入れる
-        binding.button1.setOnClickListener {
-            // EditTextからテキストを取得
-            val searchText = binding.category.text.toString()
-
-            // Realmデータベースで検索　空白なら全リスト
-            val searchResults = if (searchText.isNotEmpty()) {
-                realm.query<Task>("category contains $0", searchText).sort("date", Sort.DESCENDING).find()
-            } else {
-                // テキストが空の場合、全タスクを取得
-                realm.query<Task>().sort("date", Sort.DESCENDING).find()
-            }
-
-            // 検索結果に基づいてリストビューを更新
-            CoroutineScope(Dispatchers.Default).launch {
-                reloadListView(searchResults)
-            }
-        }
 
         // TaskAdapterを生成し、ListViewに設定する
         taskAdapter = TaskAdapter(this)
@@ -161,12 +152,46 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+        // スピナーの選択イベントをセットアップ
+        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                // 選択されたアイテムを取得
+                val selectedCategory = parent.getItemAtPosition(position).toString()
+
+                // 選択されたカテゴリに基づいてRealmデータベースをクエリ
+                val searchResults = if (selectedCategory != "すべて") {
+                    // 特定のカテゴリにマッチするタスクを検索
+                    realm.query<Task>("category == $0", selectedCategory).sort("date", Sort.DESCENDING).find()
+                } else {
+                    // カテゴリが選択されていない場合、全タスクを取得
+                    realm.query<Task>().sort("date", Sort.DESCENDING).find()
+                }
+
+                // 検索結果に基づいてリストビューを更新
+                CoroutineScope(Dispatchers.Main).launch {
+                    reloadListView(searchResults)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // アイテムが選択されなかった場合の処理
+                CoroutineScope(Dispatchers.Main).launch {
+                    reloadListView(realm.query<Task>().sort("date", Sort.DESCENDING).find())
+                }
+            }
+        }
+
+
         // Realmデータベースとの接続を開く
         val config = RealmConfiguration.create(schema = setOf(Task::class))
         realm = Realm.open(config)
 
         //タスクの変数化 初期値は全部
         val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
+
+        //スピナーにカテゴリーを入れる
+        setupCategorySpinner()
+
 
         // Realmが起動、または更新（追加、変更、削除）時にreloadListViewを実行する
         CoroutineScope(Dispatchers.Default).launch {
@@ -197,4 +222,29 @@ class MainActivity : AppCompatActivity() {
             taskAdapter.updateTaskList(tasks)
         }
     }
+
+    // Realmからユニークなカテゴリーデータを取得する関数
+    private fun getUniqueCategoriesFromRealm(): List<String> {
+
+        // カテゴリーデータの取得
+        val categories = realm.query<Task>()
+            .find()
+            .map { task -> task.category }
+            .distinct()
+
+        return categories
+    }
+
+    // スピナーを設定する関数
+    private fun setupCategorySpinner() {
+        val categories = getUniqueCategoriesFromRealm().toMutableList() //可変リストに変換
+        categories.add(0, "すべて") // リストの先頭に空文字を追加
+
+        val adapter = ArrayAdapter(this, R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        binding.spinner.adapter = adapter
+    }
+
+
+
 }
