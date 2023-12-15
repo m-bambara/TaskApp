@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TaskApp"
         tools:targetApi="31">
+        <activity
+            android:name=".CategoryInput"
+            android:exported="false" />
+
         <receiver
             android:name=".TaskAlarmReceiver"
             android:enabled="true"

@@ -11,7 +11,6 @@ import android.widget.TextView
 class TaskAdapter(context: Context) : BaseAdapter() {
     private val layoutInflater: LayoutInflater
     private var taskList = mutableListOf<Task>()
-
     init {
         this.layoutInflater = LayoutInflater.from(context)
     }
@@ -38,7 +37,7 @@ class TaskAdapter(context: Context) : BaseAdapter() {
 
         textView1.text = taskList[position].title
         textView2.text = taskList[position].date
-        textView3.text = taskList[position].category
+        textView3.text = taskList[position].category?.category_content
 
         return view
     }

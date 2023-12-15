@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-
 const val EXTRA_TASK = "jp.techacademy.moytoyoshi.taskapp.TASK"
 
 class MainActivity : AppCompatActivity() {
@@ -92,6 +91,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Realmデータベースとの接続を開く
+        val config = RealmConfiguration.Builder(setOf(Task::class, Category::class)).build()
+        realm = Realm.open(config)
+
+        //+ボタンを押したときの動作
         binding.fab.setOnClickListener {
             val intent = Intent(this, InputActivity::class.java)
             startActivity(intent)
@@ -102,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         taskAdapter = TaskAdapter(this)
         binding.listView.adapter = taskAdapter
 
+
         // ListViewをタップしたときの処理
         binding.listView.setOnItemClickListener { parent, _, position, _ ->
             // 入力・編集する画面に遷移させる
@@ -110,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra(EXTRA_TASK, task.id)
             startActivity(intent)
         }
+
 
         // ListViewを長押ししたときの処理
         binding.listView.setOnItemLongClickListener { parent, _, position, _ ->
@@ -152,16 +158,17 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // スピナーの選択イベントをセットアップ
+        // スピナーで選んだ時の動きの実装
         binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 // 選択されたアイテムを取得
-                val selectedCategory = parent.getItemAtPosition(position).toString()
+                val selectedCategory = binding.spinner.selectedItem as String
+                Log.d("kotolintest", "$selectedCategory")
 
                 // 選択されたカテゴリに基づいてRealmデータベースをクエリ
                 val searchResults = if (selectedCategory != "すべて") {
                     // 特定のカテゴリにマッチするタスクを検索
-                    realm.query<Task>("category == $0", selectedCategory).sort("date", Sort.DESCENDING).find()
+                    realm.query<Task>("category.category_content == $0", "$selectedCategory").sort("date", Sort.DESCENDING).find()
                 } else {
                     // カテゴリが選択されていない場合、全タスクを取得
                     realm.query<Task>().sort("date", Sort.DESCENDING).find()
@@ -182,9 +189,8 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        // Realmデータベースとの接続を開く
-        val config = RealmConfiguration.create(schema = setOf(Task::class))
-        realm = Realm.open(config)
+
+
 
         //タスクの変数化 初期値は全部
         val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
@@ -227,9 +233,9 @@ class MainActivity : AppCompatActivity() {
     private fun getUniqueCategoriesFromRealm(): List<String> {
 
         // カテゴリーデータの取得
-        val categories = realm.query<Task>()
+        val categories = realm.query<Category>()
             .find()
-            .map { task -> task.category }
+            .map { category -> category.category_content }
             .distinct()
 
         return categories

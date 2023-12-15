@@ -15,7 +15,7 @@
         <item name="colorAccent">@color/purple_500</item><!-- この行を追記する -->
     </style>
 
-    <style name="Theme.TaskApp.NoActionBar">s
+    <style name="Theme.TaskApp.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
