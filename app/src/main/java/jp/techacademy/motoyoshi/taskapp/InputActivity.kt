@@ -175,44 +175,38 @@ class InputActivity : AppCompatActivity() {
             val title = binding.content.titleEditText.text.toString()
             val content = binding.content.contentEditText.text.toString()
             val date = simpleDateFormat.format(calendar.time)
-            val category_content = binding.content.inputCategorySpinner.selectedItem as String
+            val categoryContent = binding.content.inputCategorySpinner.selectedItem as String
+            val categoryId = realm.query<Category>("category_content == $0", categoryContent).first().find()?.category_id ?: return
+            val taskId = task.id // 既存のタスクのIDを取得
 
-
-
-
-            if (task.id == -1) {
-                // 登録
-
-                // 最大のid+1をセット
-                task.id = (realm.query<Task>().max("id", Int::class).find() ?: -1) + 1
-                // 画面項目の値で更新
-                task.title = title
-                task.contents = content
-                task.date = date
-                task.category?.category_content = category_content
-
-
-
-                // 登録処理
-                realm.writeBlocking {
-                    copyToRealm(task)
-                }
-
-
-
-            } else {
-                // 更新
-                realm.write {
-                    findLatest(task)?.apply {
-                        // 画面項目の値で更新
+            realm.writeBlocking {
+                // 新規タスクの場合
+                if (taskId == -1) {
+                    // 新しいタスクを作成
+                    val newTask = Task().apply {
+                        this.id = (realm.query<Task>().max("id", Int::class).find() ?: -1) + 1
                         this.title = title
                         this.contents = content
                         this.date = date
-                        this.category?.category_content = category_content
+                        // カテゴリの設定
+                        this.category = query<Category>("category_id == $0", categoryId).first().find()
+                    }
+                    copyToRealm(newTask)
+                } else {
+                    // 既存のタスクを更新
+                    val updateTask = query<Task>("id == $0", taskId).first().find()
+                    val updateCategory = query<Category>("category_id == $0", categoryId).first().find()
+
+                    updateTask?.apply {
+                        this.title = title
+                        this.contents = content
+                        this.date = date
+                        this.category = updateCategory // 再取得したカテゴリを設定
                     }
                 }
             }
-            Log.d("kotolintest", "category_content")
+
+            Log.d("kotolintest", "$categoryContent")
 
             // タスクの日時にアラームを設定
             val intent = Intent(applicationContext, TaskAlarmReceiver::class.java)
@@ -228,7 +222,7 @@ class InputActivity : AppCompatActivity() {
             alarmManager.setAlarmClock(AlarmClockInfo(calendar.timeInMillis, null), pendingIntent)
         }
 
-        /**
+    /**
          * 日付と時刻のボタンの表示を設定する
          */
         private fun setDateTimeButtonText() {
