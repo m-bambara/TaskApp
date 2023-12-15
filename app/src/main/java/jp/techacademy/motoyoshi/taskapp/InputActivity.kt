@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.query.RealmResults
 import jp.techacademy.motoyoshi.taskapp.databinding.ActivityInputBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +24,6 @@ import java.util.*
 
 
 class InputActivity : AppCompatActivity() {
-    private lateinit var results: RealmResults<Category>
     private lateinit var binding: ActivityInputBinding
 
     private lateinit var realm: Realm
