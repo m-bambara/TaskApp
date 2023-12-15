@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
@@ -67,7 +66,6 @@ class InputActivity : AppCompatActivity() {
         // Realmデータベースとの接続を閉じる
         realm.close()
     }
-
 
         /**
          * 作成ボタン
@@ -204,7 +202,6 @@ class InputActivity : AppCompatActivity() {
                 }
             }
 
-            Log.d("kotolintest", "$categoryContent")
 
             // タスクの日時にアラームを設定
             val intent = Intent(applicationContext, TaskAlarmReceiver::class.java)
