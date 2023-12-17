@@ -46,18 +46,20 @@ class InputActivity : AppCompatActivity() {
         binding.content.doneButton.setOnClickListener(doneClickListener)
         binding.content.categoryCreateButton.setOnClickListener(createClickListener)
 
-        // EXTRA_TASKからTaskのidを取得
-        val intent = intent
-        val taskId = intent.getIntExtra(EXTRA_TASK, -1)
+    }
 
+    override fun onResume() {
+        super.onResume()
         // Realmデータベースとの接続を開く
         val config = RealmConfiguration.Builder(setOf(Task::class, Category::class)).build()
         realm = Realm.open(config)
+        // EXTRA_TASKからTaskのidを取得
+        val intent = intent
+        val taskId = intent.getIntExtra(EXTRA_TASK, -1)
         // タスクを取得または初期化
         initTask(taskId)
         // スピナーをセット
         setupCategorySpinner()
-
     }
 
     override fun onDestroy() {

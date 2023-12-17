@@ -91,16 +91,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Realmデータベースとの接続を開く
-        val config = RealmConfiguration.Builder(setOf(Task::class, Category::class)).build()
-        realm = Realm.open(config)
-
         //+ボタンを押したときの動作
         binding.fab.setOnClickListener {
             val intent = Intent(this, InputActivity::class.java)
             startActivity(intent)
         }
-
 
         // TaskAdapterを生成し、ListViewに設定する
         taskAdapter = TaskAdapter(this)
@@ -189,8 +184,14 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+    }
 
+    override fun onResume() {
+        super.onResume()
 
+        // Realmデータベースとの接続を開く
+        val config = RealmConfiguration.Builder(setOf(Task::class, Category::class)).build()
+        realm = Realm.open(config)
 
         //タスクの変数化 初期値は全部
         val tasks = realm.query<Task>().sort("date", Sort.DESCENDING).find()
@@ -211,6 +212,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+
     }
 
     override fun onDestroy() {
