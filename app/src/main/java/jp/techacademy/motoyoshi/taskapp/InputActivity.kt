@@ -56,10 +56,11 @@ class InputActivity : AppCompatActivity() {
         // EXTRA_TASKからTaskのidを取得
         val intent = intent
         val taskId = intent.getIntExtra(EXTRA_TASK, -1)
-        // タスクを取得または初期化
-        initTask(taskId)
         // スピナーをセット
         setupCategorySpinner()
+        // タスクを取得または初期化
+        initTask(taskId)
+
     }
 
     override fun onDestroy() {
@@ -149,12 +150,12 @@ class InputActivity : AppCompatActivity() {
                 binding.content.titleEditText.setText(task.title)
                 binding.content.contentEditText.setText(task.contents)
 
-                // spinnerの
-                val selectedBValue = task.category?.category_content
-                val selectedIndex = getUniqueCategoriesFromRealm().indexOf(selectedBValue)
-                if (selectedIndex >= 0) {
-                    binding.content.inputCategorySpinner.setSelection(selectedIndex)
-                }
+                // spinnerの初期設定
+                val categories = getUniqueCategoriesFromRealm()
+                val taskCategory = task.category?.category_content
+                val categoryIndex = categories.indexOf(taskCategory)
+                binding.content.inputCategorySpinner.setSelection(categoryIndex)
+
             }
 
             // 日付と時刻のボタンの表示を設定
@@ -165,7 +166,17 @@ class InputActivity : AppCompatActivity() {
         /**
          * タスクの登録または更新を行う カテゴリー情報の追加
          */
-        private suspend fun addTask() {
+        private fun addTask() {
+
+            //初めて登録するとき、カテゴリ―がエラ有れていない場合はアラートを表示
+            val categoryContent = binding.content.inputCategorySpinner.selectedItem as? String
+            //Log.d("kotolintest", "$categoryContent")
+            if(categoryContent == null){
+                //showAlertDialog()
+                return
+            }
+
+
             // 日付型オブジェクトを文字列に変換用
             val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.JAPANESE)
 
@@ -173,7 +184,7 @@ class InputActivity : AppCompatActivity() {
             val title = binding.content.titleEditText.text.toString()
             val content = binding.content.contentEditText.text.toString()
             val date = simpleDateFormat.format(calendar.time)
-            val categoryContent = binding.content.inputCategorySpinner.selectedItem as String
+
             val categoryId = realm.query<Category>("category_content == $0", categoryContent).first().find()?.category_id ?: return
             val taskId = task.id // 既存のタスクのIDを取得
 
@@ -250,6 +261,7 @@ class InputActivity : AppCompatActivity() {
             adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
             binding.content.inputCategorySpinner.adapter = adapter
         }
+
 }
 
 

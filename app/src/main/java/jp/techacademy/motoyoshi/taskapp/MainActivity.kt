@@ -158,7 +158,7 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 // 選択されたアイテムを取得
                 val selectedCategory = binding.spinner.selectedItem as String
-                Log.d("kotolintest", "$selectedCategory")
+                //Log.d("kotolintest", "$selectedCategory")
 
                 // 選択されたカテゴリに基づいてRealmデータベースをクエリ
                 val searchResults = if (selectedCategory != "すべて") {
